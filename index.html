@@ -18,7 +18,7 @@
     // Function to fetch the updated order details from the server
     const fetchOrderDetails = async () => {
         try {
-            const response = await fetch('http://localhost:3000/handle-payment', {
+            const response = await fetch('http://localhost:3000/api/handle-payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@
 
         try {
             // Make a request to your server to verify the payment
-            const verificationResponse = await fetch('http://localhost:3000/verify-payment', {
+            const verificationResponse = await fetch('http://localhost:3000/api/verify-payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
