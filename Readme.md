@@ -1,10 +1,10 @@
-# [Payment]
+# Payment
 
-[Payment gateway implementaion]
+Payment gateway implementaion
 
 ## Project Structure
 
-- `index.html`: Frontend HTML file.
+- `payment.html`: Frontend HTML file.
 - `backend/`: Backend code directory.
   - `app.js`: Entry point for the backend.
   - (Other backend files and folders...)
