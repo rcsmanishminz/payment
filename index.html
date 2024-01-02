@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+
+<button id="payButton">Pay Now</button>
+
+
+<script>
+    const razorpayApiKey = 'rzp_test_YiIO8XMhgrOEl7';
+
+    // Function to fetch the updated order details from the server
+    const fetchOrderDetails = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/handle-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch order details');
+            }
+
+            const { order, amountInPaise, currency } = await response.json();
+            return { order, amountInPaise, currency };
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            throw error;
+        }
+    };
+
+    // Function to handle successful payment
+    const handlePaymentSuccess = async (orderId, paymentId, signature) => {
+        console.log('Payment successful. Order ID:', orderId, 'Payment ID:', paymentId, 'Signature:', signature);
+
+        try {
+            // Make a request to your server to verify the payment
+            const verificationResponse = await fetch('http://localhost:3000/verify-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId,
+                    paymentId,
+                    signature,
+                }),
+            });
+
+            const verificationData = await verificationResponse.json();
+            console.log('Payment verification:', verificationData);
+            alert('Payment verification successful!');
+        } catch (verificationError) {
+            console.error('Error verifying payment:', verificationError);
+            alert('Payment verification failed!');
+        }
+    };
+
+    // Function to open the Razorpay checkout form
+    const openRazorpayCheckout = orderId => {
+        const options = {
+            key: razorpayApiKey,
+            //amount :  if not specified in backend specify here for now No need to include amount here
+            currency: 'INR',
+            name: 'Your Company Name',
+            description: 'Payment for Order #123',
+            order_id: orderId,
+            handler: response => {
+                
+                const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = response;
+                handlePaymentSuccess(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+            },
+            prefill: {
+                name: 'John Doe',
+                email: 'john.doe@example.com',
+                contact: '1234567890'
+            },
+            notes: {
+                // Add any additional notes or metadata here
+            },
+            theme: {
+                color: '#528FF0'
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+    };
+
+    // Add an event listener to the button
+    document.getElementById('payButton').addEventListener('click', async () => {
+        try {
+            const { order } = await fetchOrderDetails();
+            openRazorpayCheckout(order.id);
+        } catch (error) {
+            // Handle the error as needed
+        }
+    });
+</script>
+
+</body>
+</html>
